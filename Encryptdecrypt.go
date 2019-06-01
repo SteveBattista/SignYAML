@@ -1,14 +1,16 @@
 package main
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
         "syscall"
         "golang.org/x/crypto/scrypt"
         "golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/crypto/chacha20poly1305"
+	
 )
 
 func main() {
@@ -49,7 +51,7 @@ func main() {
         fmt.Printf("Passphrase: %s\n", string(passPhrasebyte))
         fmt.Printf("Key: %0x\n", key)
         fmt.Printf("Salt: %0x\n", salt)
-	block, err := aes.NewCipher(key)
+	aead, err := chacha20poly1305.New(key)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -60,18 +62,30 @@ func main() {
 		panic(err.Error())
 	}
 
-	aesgcm, err := cipher.NewGCM(block)
+	ciphertext := aead.Seal(nil, nonce, plaintext, nil)
+	fmt.Printf("cipertext: %x\n", ciphertext)
+	/*if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		panic(err.Error())
+	}
+	key,err = scrypt.Key(passPhrasebyte, salt, 32768, 8, 1, keyLen)
 	if err != nil {
 		panic(err.Error())
 	}
-
-	ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
-	fmt.Printf("cipertext: %x\n", ciphertext)
-
-        decodedplaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	aead, err = chacha20poly1305.New(key)
+	if err != nil {
+		panic(err.Error())
+	}
+*/
+        decodedplaintext, err := aead.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	fmt.Printf("Output : %s\n", decodedplaintext)
+ 	if (bytes.Equal(decodedplaintext,plaintext)){
+		fmt.Printf("Input matches output.\n")
+	} else {
+		fmt.Printf("Input does not match output!!!!\n")
+	}
+	
 }
