@@ -14,11 +14,7 @@ import (
 )
 
 func main() {
-	// Load your secret key from a safe place and reuse it across multiple
-	// Seal/Open calls. (Obviously don't use this example key for anything
-	// real.) If you want to convert a passphrase to a key, use a suitable
-	// package like bcrypt or scrypt.
-	// When decoded the key should be 16 bytes (AES-128) or 32 (AES-256).
+
         plaintext := []byte("78159950614993106102261826315902145377927365593578895476104631918663527422869")
         
         
@@ -36,7 +32,6 @@ func main() {
         The decrypted key could still be in memory to speed things up. Hopefully the pass-phrase would be kept in memory, you don't want to have to type the passowrd 100 times. 
         */
 	
-        //reader := bufio.NewReader(os.Stdin)
         fmt.Println("Enter in PassPhrase?")
       
         passPhrasebyte, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -56,7 +51,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	// Never use more than 2^32 random nonces with a given key because of the risk of a repeat.
+	// Never use more than 2^32 random nonces with the same key because of the risk of a repeat. https://tools.ietf.org/html/rfc7539 requires a 96 bit nonce
 	nonce := make([]byte, 12)
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
@@ -64,6 +59,7 @@ func main() {
 
 	ciphertext := aead.Seal(nil, nonce, plaintext, nil)
 	fmt.Printf("cipertext: %x\n", ciphertext)
+	// For testing incorrect key
 	/*if _, err := io.ReadFull(rand.Reader, salt); err != nil {
 		panic(err.Error())
 	}
@@ -85,6 +81,7 @@ func main() {
  	if (bytes.Equal(decodedplaintext,plaintext)){
 		fmt.Printf("Input matches output.\n")
 	} else {
+		// You should never get here as if the input did not match the output the encryption fuction should fail
 		fmt.Printf("Input does not match output!!!!\n")
 	}
 	
