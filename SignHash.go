@@ -5,22 +5,28 @@ package main
 
 
 import (
-  "crypto/sha256"
-  "crypto/ecdsa"
-  "fmt"
-  "io"
+   "crypto/sha256"
+   "crypto/ecdsa"
+   "fmt"
+   "io"
    "crypto/elliptic"
    "log"
    "io/ioutil"
    "gopkg.in/yaml.v2"
-  "os"
-  "strings"
-  "crypto/rand"
-  "math/big"
+   "os"
+   "strings"
+   "crypto/rand"
+   "math/big"
+   "golang.org/x/crypto/scrypt"
+   "golang.org/x/crypto/ssh/terminal"
+   "golang.org/x/crypto/chacha20poly1305"
+   "syscall"
 )
 
 type PrivateData struct {
-   D *big.Int `yaml:"D"`
+   D []byte `yaml:"EncrypotedD"`
+   S []byte  `yaml:"Salt"`
+   N []byte  `yaml:"Nonce"` 
    X *big.Int `yaml:"Mx"`
    Y *big.Int `yaml:"My"`
 }
@@ -56,6 +62,30 @@ func main() {
  
 }
 
+func decryptkey(encryptedkey []byte, nonce []byte, salt []byte) (privateKeyD *big.Int){
+   keyLen := 32
+   fmt.Println("Enter in PassPhrase to generate key to decrypt private key")
+   passPhrasebyte, err := terminal.ReadPassword(int(syscall.Stdin))
+   if err != nil {
+      log.Fatalln(err.Error())
+   }
+   key,err := scrypt.Key(passPhrasebyte, salt, 32768, 8, 1, keyLen)
+   if err != nil {
+      log.Fatalln(err.Error())
+   }
+   aead, err := chacha20poly1305.New(key)
+   if err != nil {
+     log.Fatalln(err.Error())
+   }
+   decodedplaintext, err := aead.Open(nil, nonce, encryptedkey, nil)
+	if err != nil {
+      log.Fatalln(err.Error())
+	}
+   var scratch big.Int
+   privateKeyD = scratch.SetBytes(decodedplaintext)
+   return
+}
+
 
 func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) { 
   privateData := PrivateData{}
@@ -67,7 +97,7 @@ func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) {
    if err != nil {
       log.Fatal(err)
    }
-   privateKey.D = privateData.D
+   privateKey.D = decryptkey(privateData.D,privateData.N,privateData.S)
    privateKey.PublicKey.X = privateData.X
    privateKey.PublicKey.Y = privateData.Y
    privateKey.PublicKey.Curve = elliptic.P256()

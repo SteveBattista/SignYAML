@@ -37,14 +37,10 @@ func main() {
 // For all arguments
    argslice := os.Args [1:]
    for _,file := range argslice {
-//      fmt.Printf("%s : \n",file)
 //strip .sig
       filePath := strings.TrimRight(file,".sig") 
-//      fmt.Printf("Looking at %s : ",filePath)
 // calc sha256 of file
       hashofFile := sha256string(filePath)
- //       fmt.Printf("%s\n",hashofFile)
- //       fmt.Printf("Reading public key\n")
  
       readSignedHash(file,&signedHash)
          // compare to sig's sha256
@@ -70,10 +66,11 @@ func main() {
 
 func readPubicKey(publicKeyFile string, publicKey *ecdsa.PublicKey) { 
   publicData := PublicData{}
+
    stream, err := ioutil.ReadFile(publicKeyFile)
    if err != nil {
       log.Fatal(err)
-   }    
+   }  
    err = yaml.Unmarshal(stream, &publicData)
    if err != nil {
       log.Fatal(err)
@@ -82,7 +79,7 @@ func readPubicKey(publicKeyFile string, publicKey *ecdsa.PublicKey) {
     publicKey.Y = publicData.Y
 
     publicKey.Curve = elliptic.P256()
- //   fmt.Printf("Public\nX : %d\nY : %d\n",publicKey.X,publicKey.Y)
+
    return
 }
 
@@ -90,12 +87,11 @@ func readSignedHash(sigFile string, signedHash *SignedHash) {
    stream, err := ioutil.ReadFile(sigFile)
    if err != nil {
       log.Fatal(err)
-   }    
+   }   
    err = yaml.Unmarshal(stream, &signedHash)
    if err != nil {
       log.Fatal(err)
    }
-
    return
 }
 
