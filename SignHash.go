@@ -38,9 +38,20 @@ type SignedHash struct {
 }
 
 func main() {
+   saltLen :=32
+   nonceLen := 12
+   privateKey := ecdsa.PrivateKey{}
+   nonce := make([]byte, nonceLen)
+   salt := make([]byte, saltLen)
+   nonce,salt = readPrivateKey("Signpriv.sig",&privateKey)
+//   fmt.Printf("Nonce %d \n", nonce )
+//   fmt.Printf("Salt %d \n", salt )
+   symetricKey :=createDecryptKey(salt)
+   decryptedKey := decryptKey(privateKey.D,nonce,symetricKey)
+   privateKey.D = decryptedKey
 // take list of file paths and generate SHA256 hashes for each of the files
    var hashstring string
-   privateKey := ecdsa.PrivateKey{}
+   
    argslice := os.Args [1:]
    for _,files := range argslice {
 //    fmt.Printf("%s : ",files)
@@ -50,7 +61,7 @@ func main() {
   
  //       fmt.Printf("%s\n",hashstring)
  //        fmt.Printf("Reading Private key\n")
-         readPrivateKey("Signpriv.sig",&privateKey)
+         
          r, s, err := ecdsa.Sign(rand.Reader, &privateKey, []byte(hashstring))
          if err != nil {
 		panic(err)
@@ -62,33 +73,42 @@ func main() {
  
 }
 
-func decryptkey(encryptedkey []byte, nonce []byte, salt []byte) (privateKeyD *big.Int){
+func createDecryptKey(salt []byte ) (key []byte) {
    keyLen := 32
    fmt.Println("Enter in PassPhrase to generate key to decrypt private key")
    passPhrasebyte, err := terminal.ReadPassword(int(syscall.Stdin))
    if err != nil {
       log.Fatalln(err.Error())
    }
-   key,err := scrypt.Key(passPhrasebyte, salt, 32768, 8, 1, keyLen)
+   key,err = scrypt.Key(passPhrasebyte, salt, 32768, 8, 1, keyLen)
    if err != nil {
       log.Fatalln(err.Error())
    }
+   return
+}
+
+func decryptKey(encryptedKey *big.Int, nonce []byte,  key []byte) (decryptedD *big.Int){
    aead, err := chacha20poly1305.New(key)
    if err != nil {
      log.Fatalln(err.Error())
    }
-   decodedplaintext, err := aead.Open(nil, nonce, encryptedkey, nil)
+ /*
+   fmt.Printf("Nonce %d \n", nonce )
+   fmt.Printf("Cipher %d \n", encryptedKey.Bytes())
+*/
+   decodedplaintext, err := aead.Open(nil, nonce, encryptedKey.Bytes(), nil)
 	if err != nil {
       log.Fatalln(err.Error())
 	}
+//   fmt.Printf("Plaintext %d \n", decodedplaintext)
    scratch := big.Int{}
    scratch.SetBytes(decodedplaintext)
-   privateKeyD = (&scratch)
+   decryptedD = (&scratch)
    return
 }
 
 
-func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) { 
+func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) (nonce []byte, salt []byte){ 
   privateData := PrivateData{}
    stream, err := ioutil.ReadFile(privateKeyFile)
    if err != nil {
@@ -98,20 +118,18 @@ func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) {
    if err != nil {
       log.Fatal(err)
    }
-   /*fmt.Printf("%0x \n", privateData.D.Bytes())
-   scratchD := big.Int{}
-   scratchN := big.Int{}
-   scratchS := big.Int{}
-   scratchD = (*privateData.D)
-   scratchN = (*(privateData.N))
-   scratchS = (*privateData.S)
-   fmt.Printf ("%d \n",privateData.N)
-   fmt.Printf("%0x \n",privateData.N.Bytes())*/
-   privateKey.D = decryptkey(privateData.D.Bytes(),privateData.N.Bytes(),privateData.S.Bytes())
+   nonce = privateData.N.Bytes()
+   salt = privateData.S.Bytes()
+   privateKey.D = privateData.D
+/* 
+   fmt.Printf("Nonce %d == %d \n", (nonce), privateData.N.Bytes())
+   fmt.Printf("Cipher %d == %d \n", (privateKey.D.Bytes()), privateData.D.Bytes())
+   fmt.Printf("Salt %d == %d \n", (salt), privateData.S.Bytes())
+*/
    privateKey.PublicKey.X = privateData.X
    privateKey.PublicKey.Y = privateData.Y
    privateKey.PublicKey.Curve = elliptic.P256()
- //  fmt.Printf("Private \nD: %d\nX : %d\nY : %d\n",privateKey.D,privateKey.PublicKey.X,privateKey.PublicKey.Y)
+//   fmt.Printf("Private \nD: %d\nX : %d\nY : %d\n",privateKey.D,privateKey.PublicKey.X,privateKey.PublicKey.Y)
 
    return
 }

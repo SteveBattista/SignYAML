@@ -17,7 +17,7 @@ import ("fmt"
 type PrivateData struct {
    D *big.Int `yaml:"EncrypotedD"`
    S *big.Int `yaml:"Salt"`
-   N *big.Int`yaml:"Nonce"` 
+   N *big.Int `yaml:"Nonce"` 
    X *big.Int `yaml:"Mx"`
    Y *big.Int `yaml:"My"`
 }
@@ -35,28 +35,27 @@ func main() {
    if err != nil {
       log.Fatalln(err.Error())
    }
-   publicKey := privateKey.Public().(*ecdsa.PublicKey)
-
+   publicKey := privateKey.PublicKey
+   
+   ciphertext, nonce, salt := encryptKey(privateKey.D)
+   
    fmt.Printf("Writing Private key\n")
-   
-   ciphertext, nonce, salt := encryptkey(privateKey.D)
-   
-   printPrivateKey(publicKey,nonce,ciphertext,salt)
+   printPrivateKey(&publicKey,nonce,ciphertext,salt)
  
    
    fmt.Printf("Writing Public key\n")
- 
-   
-   printPubicKey(publicKey)
+   printPubicKey(&publicKey)
 
 }
 
-func encryptkey(privateKeyD *big.Int) (ciphertext []byte, nonce []byte, salt []byte) { 
+func encryptKey(privateKeyD *big.Int) (ciphertext []byte, nonce []byte, salt []byte) { 
    keyLen := 32
+   saltLen :=32
+   nonceLen :=12
    /*https://www.ietf.org/rfc/rfc2898.txt states that this should be at least 8 octets long. The goal is to prevent re-use
    since 256 is the new hotness (2018-2019) why not make a salt that is 256 bits. It is impossilbe (not enough energy in the universe) to create rainbow tables for 2^256
    salts. */
-   salt = make([]byte, 32)
+   salt = make([]byte, saltLen)
    if _, err := io.ReadFull(rand.Reader, salt); err != nil {
       log.Fatalln(err.Error())
    }
@@ -80,10 +79,11 @@ func encryptkey(privateKeyD *big.Int) (ciphertext []byte, nonce []byte, salt []b
      log.Fatalln(err.Error())
    }
    // Never use more than 2^32 random nonces with the same key because of the risk of a repeat. https://tools.ietf.org/html/rfc7539 requires a 96 bit nonce
-   nonce = make([]byte, 12)
+   nonce = make([]byte, nonceLen)
    if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
       log.Fatalln(err.Error())
    }
+//   fmt.Printf("Plaintext %d \n", privateKeyD.Bytes())
    ciphertext = aead.Seal(nil, nonce, privateKeyD.Bytes(), nil)
    return
 }
@@ -125,13 +125,14 @@ func printPrivateKey(publicKey *ecdsa.PublicKey, nonce []byte, ciphertext []byte
    scratchS := big.Int{}
    scratchD.SetBytes(ciphertext)
    privateData.D = (&scratchD)
- //  fmt.Printf("%d == %d \n", (ciphertext), privateData.D.Bytes())
    scratchN.SetBytes(nonce)
    privateData.N = (&scratchN)
-//   fmt.Printf("%d == %d \n", (nonce), privateData.N.Bytes())
    scratchS.SetBytes(salt)
    privateData.S = (&scratchS) 
-//   fmt.Printf("%d == %d \n", (salt), privateData.S.Bytes())
+
+//   fmt.Printf("Nonce %d \n", nonce)
+//   fmt.Printf("Cipher %d \n", ciphertext)
+//   fmt.Printf("Salt %d \n", salt)
 
    privateData.X = publicKey.X
    privateData.Y = publicKey.Y

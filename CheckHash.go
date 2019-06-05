@@ -45,18 +45,19 @@ func main() {
       readSignedHash(file,&signedHash)
          // compare to sig's sha256
       hashMatch:= (signedHash.Hash == hashofFile)
+      fmt.Printf("%s :", filePath)
       if !(hashMatch){
-          fmt.Printf("Hash in sig file does not match hash of file!!!!!\n")
+          fmt.Printf("Hash = mismatch  ")
       } else {
 // Verify signature of hash with publc key
-          fmt.Printf("Hash in sig file matches hash of file.\n")
+          fmt.Printf("Hash = match  ")
           valid := ecdsa.Verify(&publicKey, []byte(hashofFile),signedHash.R,signedHash.S)
 // if no varification mention
 // else mention that it is ok.
            if !(valid) {
-              fmt.Printf("Signature of hash is not valid!!!!!\n")
+              fmt.Printf("Signature = Invalid\n")
            } else {
-             fmt.Printf("Signature of hash is valid.\n")
+             fmt.Printf("Signature = valid \n")
            }
        }
    }
