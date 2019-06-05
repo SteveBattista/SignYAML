@@ -5,17 +5,17 @@ package main
 
 
 import (
-  "crypto/sha256"
-  "crypto/ecdsa"
-  "fmt"
-  "io"
+   "crypto/sha256"
+   "crypto/ecdsa"
+   "fmt"
+   "io"
    "crypto/elliptic"
    "log"
    "io/ioutil"
    "gopkg.in/yaml.v2"
-  "os"
-  "strings"
-  "math/big"
+   "os"
+   "strings"
+   "math/big"
 )
 
 type PublicData struct {

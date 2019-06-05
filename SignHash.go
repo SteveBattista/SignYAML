@@ -24,9 +24,9 @@ import (
 )
 
 type PrivateData struct {
-   D []byte `yaml:"EncrypotedD"`
-   S []byte  `yaml:"Salt"`
-   N []byte  `yaml:"Nonce"` 
+   D *big.Int `yaml:"EncrypotedD"`
+   S *big.Int  `yaml:"Salt"`
+   N *big.Int  `yaml:"Nonce"` 
    X *big.Int `yaml:"Mx"`
    Y *big.Int `yaml:"My"`
 }
@@ -81,8 +81,9 @@ func decryptkey(encryptedkey []byte, nonce []byte, salt []byte) (privateKeyD *bi
 	if err != nil {
       log.Fatalln(err.Error())
 	}
-   var scratch big.Int
-   privateKeyD = scratch.SetBytes(decodedplaintext)
+   scratch := big.Int{}
+   scratch.SetBytes(decodedplaintext)
+   privateKeyD = (&scratch)
    return
 }
 
@@ -97,7 +98,16 @@ func readPrivateKey(privateKeyFile string, privateKey *ecdsa.PrivateKey) {
    if err != nil {
       log.Fatal(err)
    }
-   privateKey.D = decryptkey(privateData.D,privateData.N,privateData.S)
+   /*fmt.Printf("%0x \n", privateData.D.Bytes())
+   scratchD := big.Int{}
+   scratchN := big.Int{}
+   scratchS := big.Int{}
+   scratchD = (*privateData.D)
+   scratchN = (*(privateData.N))
+   scratchS = (*privateData.S)
+   fmt.Printf ("%d \n",privateData.N)
+   fmt.Printf("%0x \n",privateData.N.Bytes())*/
+   privateKey.D = decryptkey(privateData.D.Bytes(),privateData.N.Bytes(),privateData.S.Bytes())
    privateKey.PublicKey.X = privateData.X
    privateKey.PublicKey.Y = privateData.Y
    privateKey.PublicKey.Curve = elliptic.P256()

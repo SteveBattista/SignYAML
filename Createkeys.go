@@ -15,9 +15,9 @@ import ("fmt"
 )
 
 type PrivateData struct {
-   D []byte `yaml:"EncrypotedD"`
-   S []byte `yaml:"Salt"`
-   N []byte `yaml:"Nonce"` 
+   D *big.Int `yaml:"EncrypotedD"`
+   S *big.Int `yaml:"Salt"`
+   N *big.Int`yaml:"Nonce"` 
    X *big.Int `yaml:"Mx"`
    Y *big.Int `yaml:"My"`
 }
@@ -120,9 +120,19 @@ func printPrivateKey(publicKey *ecdsa.PublicKey, nonce []byte, ciphertext []byte
       return
      }
    defer privateKeyFile.Close()
-   privateData.D = ciphertext
-   privateData.N = nonce
-   privateData.S =  salt
+   scratchD := big.Int{}
+   scratchN := big.Int{}
+   scratchS := big.Int{}
+   scratchD.SetBytes(ciphertext)
+   privateData.D = (&scratchD)
+ //  fmt.Printf("%d == %d \n", (ciphertext), privateData.D.Bytes())
+   scratchN.SetBytes(nonce)
+   privateData.N = (&scratchN)
+//   fmt.Printf("%d == %d \n", (nonce), privateData.N.Bytes())
+   scratchS.SetBytes(salt)
+   privateData.S = (&scratchS) 
+//   fmt.Printf("%d == %d \n", (salt), privateData.S.Bytes())
+
    privateData.X = publicKey.X
    privateData.Y = publicKey.Y
    marshaledBytes, err := yaml.Marshal(privateData)
