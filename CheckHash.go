@@ -14,7 +14,7 @@ import (
    "io/ioutil"
    "gopkg.in/yaml.v2"
    "os"
-   "strings"
+//   "strings"
    "math/big"
 )
 
@@ -38,14 +38,15 @@ func main() {
    argslice := os.Args [1:]
    for _,file := range argslice {
 //strip .sig
-      filePath := strings.TrimRight(file,".sig") 
+      filePath := file[:len(file)-4]
 // calc sha256 of file
+      fmt.Printf("%s :", filePath)
       hashofFile := sha256string(filePath)
  
       readSignedHash(file,&signedHash)
          // compare to sig's sha256
       hashMatch:= (signedHash.Hash == hashofFile)
-      fmt.Printf("%s :", filePath)
+      
       if !(hashMatch){
           fmt.Printf("Hash = mismatch  ")
       } else {
