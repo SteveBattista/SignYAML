@@ -1,7 +1,8 @@
 # SignYAML
 Puprose: In Kubernetes, there are a lot of configuration files and container files. This progam allows defenders to check to see if someone has changed files before they go into production.This will prevent accidental changes and also limit attackers.
 
-Reccomendation: Giving the rights to edit/delete key files should be given to a diffrent account than the standard one that generates YAML or containter files. Also, if you have a SOC, you can alert on changes to the key files to ensure that these are updated explistly. While configurations can be changed with anyone with the password to re-sign files, changing the keys should be a limited action
+Reccomendation:<br />
+Giving the rights to edit/delete key files should be given to a diffrent account than the standard one that generates YAML or containter files. Also, if you have a SOC, you can alert on changes to the key files to ensure that these are updated explistly. While configurations can be changed with anyone with the password to re-sign files, changing the keys should be a limited action
 
 Threat Model:
  An attacker has gotten permission to edit .YAML and container files. The defender wants the ablity to ensure the integity of these files and not allow them to be consumed if they have changed and the signed hashes do not match.
