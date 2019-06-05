@@ -33,7 +33,7 @@ func main() {
 
    publicKey := ecdsa.PublicKey{}
    signedHash :=SignedHash{}
-   readPubicKey("Signpub.sig",&publicKey)
+   readPubicKey("Signpub.key",&publicKey)
 // For all arguments
    argslice := os.Args [1:]
    for _,file := range argslice {

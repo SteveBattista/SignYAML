@@ -43,7 +43,7 @@ func main() {
    privateKey := ecdsa.PrivateKey{}
    nonce := make([]byte, nonceLen)
    salt := make([]byte, saltLen)
-   nonce,salt = readPrivateKey("Signpriv.sig",&privateKey)
+   nonce,salt = readPrivateKey("Signpriv.key",&privateKey)
 //   fmt.Printf("Nonce %d \n", nonce )
 //   fmt.Printf("Salt %d \n", salt )
    symetricKey :=createDecryptKey(salt)
@@ -151,7 +151,7 @@ func Writetofile(filename string, hashstring string,r *big.Int, s *big.Int) {
     if err != nil {
        return 
     }
- //  fmt.Printf("%s\n",marshaledBytes)
+   fmt.Printf("Creating signing file for %s\n",filename)
     _, err = fileout.WriteString(string(marshaledBytes))
     if err != nil {
         log.Fatal(err)

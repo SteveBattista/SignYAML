@@ -90,7 +90,7 @@ func encryptKey(privateKeyD *big.Int) (ciphertext []byte, nonce []byte, salt []b
 
 func printPubicKey(publicKey *ecdsa.PublicKey){
    publicData := PublicData{}
-   publicKeyFile, err := os.Create("Signpub.sig")
+   publicKeyFile, err := os.Create("Signpub.key")
    if err != nil {
       log.Fatal(err)
      }
@@ -114,7 +114,7 @@ func printPubicKey(publicKey *ecdsa.PublicKey){
 
 func printPrivateKey(publicKey *ecdsa.PublicKey, nonce []byte, ciphertext []byte, salt []byte) { 
    privateData := PrivateData{}
-   privateKeyFile, err := os.Create("Signpriv.sig")
+   privateKeyFile, err := os.Create("Signpriv.key")
    if err != nil {
       log.Fatal(err)
       return
