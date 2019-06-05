@@ -54,4 +54,7 @@ go run SignHash.go <files> -> Creates a file named <filename>.sig. Adds a hash a
     memory-request-limit-3.yaml :Hash = match  Signature = valid <br />
     pod.yaml :Hash = match  Signature = valid <br />
 
-  
+  Drawbacks:<br />
+  On my old laptop Dell Latitiude 6400 8Gbram running Ubuntu it took 12 seconds to hash a 2.5GB file. I could see that it could take some time to sign or check a bunch of images.<br />
+  I wanted to use the curve25519 and could have used the box library. The issue is that when the check fails, the progam stops. I did not want to stop the process as I wanted to be able to check a bunch of files and have the user come back and look at those that did not fail later.<br />
+  For the password, I would have really liked to have it printed while typing and then erased when the return is pressed. This would both give feedback to the user and not have the password in the history buffer of the terminal. I don't know if this is possible.<br />
