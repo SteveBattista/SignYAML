@@ -31,39 +31,40 @@ go run CreateKeys.go -> Creates Pubic and Private keys. Encrypts the private key
 
 go run SignHash.go <files> -> Creates a file named <filename>.sig. Adds a hash and signs the hash. You will need the passphrase to access the private key created in CreateKeys. The hash is a SHA256 hash of the file.
   
- go run CheckHash.go <files> ->Compares hash in .sig file to the hash of the original file. If these match, it uses the public key to check the signature of the hash. The password is not needed for this function as it does not need to read the private key
+go run CheckHash.go <sigfiles> ->Compares hash in .sig file to the hash of the original file. If these match, it uses the public key to check the signature of the hash. The password is not needed for this function as it does not need to read the private key
+ 
+UpdatedSince.go <seconds> <sigfiles>: Looks for files assoicated with .sig file and checks to see if they have been updated since s certin number of seconds. This will allow users to check for files that have changed since a certian time.<br />
   
   Examples:<br />
-  CreateKeys.go purpose: Create key files. Private key is encrypted with a password. <br />
   CreateKeys.go aruments: None <br />
-  go run CreateKeys.go<br />
+  `go run CreateKeys.go`<br />
     Enter in PassPhrase to generate key to encrypt private key<br />
     [user types in key it is not echoed back]<br />
     Writing Private key<br />
     Writing Public key<br />
 
-  SignHash.go purpose: Hashes and signs the hash for files given as arguments. Writes this in .sig files.Needs password to decrypt private key.<br />
+  
   SignHash.go aruments: list of files to create signatures <br />
-  go run SignHash.go file.txt *.yaml<br />
+  `go run SignHash.go file.txt *.yaml`<br />
     Enter in PassPhrase to generate key to decrypt private key<br />
     [user types in key it is not echoed back]<br />
     Creating signing file for file.txt<br />
     Creating signing file for memory-request-limit-3.yaml<br />
     Creating signing file for pod.yaml<br />
 
-  CheckHash.go purpose: Checks to see if hash in .sig file matches corresponding file. Checks signature of hash in .sig file <br />
+ 
   CheckHash.go arguments: list of files to create signatures <br />
-  go run CheckHash.go *.sig<br />
+  `go run CheckHash.go *.sig`<br />
     file.txt :Hash = match  Signature = valid <br />
     memory-request-limit-3.yaml :Hash = match  Signature = valid <br />
     pod.yaml :Hash = match  Signature = valid <br />
     
-  UpdatedSince.go  purpose: Looks for files assoicated with .sig file and checks to see if they have been updated since s certin number of seconds. This will allow users to check for files that have changed since a certian time.<br />
+ 
   UpdatedSince.go arguments: number of seconds list of .sig files<br />
-  UpdatedSince.go 1000 *.sig<br />
+  `UpdatedSince.go 1000 *.sig`<br />
   file.txt.sig pod.yaml.sig<br />
   
- UpdatedSince.go example use: go run CheckHash.go \`go run UpdatedSince.go 1000 *.sig\`<br />
+ UpdatedSince.go example use: ```go run CheckHash.go \`go run UpdatedSince.go 1000 *.sig\```<br />
  file.txt :Hash = match  Signature = valid 
  pod.yaml :Hash = match  Signature = valid 
 
