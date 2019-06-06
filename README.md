@@ -33,7 +33,7 @@ go run SignHash.go <files> -> Creates a file named <filename>.sig. Adds a hash a
   
 go run CheckHash.go <sigfiles> ->Compares hash in .sig file to the hash of the original file. If these match, it uses the public key to check the signature of the hash. The password is not needed for this function as it does not need to read the private key
  
-UpdatedSince.go <seconds> <sigfiles>: Looks for files assoicated with .sig file and checks to see if they have been updated since s certin number of seconds. This will allow users to check for files that have changed since a certian time.<br />
+UpdatedSince.go <seconds> <sigfiles>: Looks for files associated with .sig file and checks to see if they have been updated since certain number of seconds. This will allow users to check for files that have changed since a certain time. This was born out of the fact that large images could take seconds to hash. No reason checking these if they did not change. <br />
   
   Examples:<br />
   CreateKeys.go aruments: None <br />
