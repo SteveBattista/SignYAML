@@ -64,7 +64,7 @@ UpdatedSince.go <seconds> <sigfiles>: Looks for files assoicated with .sig file 
   `UpdatedSince.go 1000 *.sig`<br />
   file.txt.sig pod.yaml.sig<br />
   
- UpdatedSince.go example use: ```go run CheckHash.go \`go run UpdatedSince.go 1000 *.sig\```<br />
+ UpdatedSince.go example use: ```go run CheckHash.go \`go run UpdatedSince.go 1000 *.sig\` ```<br />
  file.txt :Hash = match  Signature = valid 
  pod.yaml :Hash = match  Signature = valid 
 
